@@ -1404,10 +1404,14 @@ func (ctrl *ProvisionController) provisionClaimOperation(ctx context.Context, cl
 	if nodeName, ok := getString(claim.Annotations, annSelectedNode, annAlphaSelectedNode); ok {
 		if ctrl.nodeLister != nil {
 			selectedNode, err = ctrl.nodeLister.Get(nodeName)
+			// if node does not exist, remove volume.kubernetes.io/selected-node annotation
+			if apierrs.IsNotFound(err) {
+				delete(claim.Annotations, annSelectedNode)
+			}
 		} else {
 			selectedNode, err = ctrl.client.CoreV1().Nodes().Get(ctx, nodeName, metav1.GetOptions{}) // TODO (verult) cache Nodes
 		}
-		if err != nil {
+		if err != nil && !apierrs.IsNotFound(err) {
 			err = fmt.Errorf("failed to get target node: %v", err)
 			ctrl.eventRecorder.Event(claim, v1.EventTypeWarning, "ProvisioningFailed", err.Error())
 			return ProvisioningNoChange, err
