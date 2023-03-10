@@ -912,7 +912,7 @@ func TestTopologyParams(t *testing.T) {
 				newStorageClass("class-1", "foo.bar/baz"),
 				newClaim("claim-1", "uid-1-1", "class-1", "foo.bar/baz", "", map[string]string{annSelectedNode: "node-1"}),
 			},
-			expectedParams: &provisionParams{},
+			expectedParams: nil,
 		},
 	}
 	for _, test := range tests {
